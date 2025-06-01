@@ -1,0 +1,42 @@
+name: AI Info Weekly Collection
+
+on:
+  schedule:
+    # 毎週月曜日 09:00 JST (UTC 00:00)
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  collect-ai-info:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install feedparser requests google-api-python-client google-auth google-auth-oauthlib
+        
+    - name: Create credentials file
+      run: |
+        echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+        
+    - name: Run AI info collector
+      env:
+        DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+      run: |
+        python ai_info_collector.py
+        
+    - name: Clean up credentials
+      run: |
+        rm credentials.json
+
+# セットアップが必要なGitHub Secrets:
+# - GOOGLE_CREDENTIALS: Google Drive API認証情報のJSON
+# - DRIVE_FOLDER_ID: アップロード先のGoogle DriveフォルダID
