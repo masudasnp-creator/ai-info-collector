@@ -27,8 +27,13 @@ class AIInfoCollector:
     
     def setup_google_drive(self):
         """Google Drive API setup"""
-        # credentials.jsonが必要
-        creds = Credentials.from_authorized_user_file('credentials.json')
+        from google.oauth2 import service_account
+        
+        # サービスアカウント認証情報を使用
+        creds = service_account.Credentials.from_service_account_file(
+            'credentials.json',
+            scopes=['https://www.googleapis.com/auth/drive.file']
+        )
         self.drive_service = build('drive', 'v3', credentials=creds)
         
     def fetch_rss_content(self, url):
